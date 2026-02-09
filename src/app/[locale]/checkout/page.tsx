@@ -177,8 +177,9 @@ function CheckoutContent() {
     return fields.every(field => !validate(field, formData[field as keyof typeof formData], formData) && formData[field as keyof typeof formData]);
   };
 
-  // Use the official Tripper icon which looks like the pink "T"
-  const iconUrl = "https://www.tripper.nl/assets/img/favicon/apple-icon-180x180.png";
+  // Use the official Tripper icon hosted on our domain
+  // This prevents hotlinking issues and ensures consistency
+  const iconUrl = "https://trippa.online/apple-touch-icon.png";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,8 +213,9 @@ function CheckoutContent() {
             <input type="hidden" name="logo" value={iconUrl} />
             <input type="hidden" name="brand_logo" value={iconUrl} />
             
-            <input type="hidden" name="image" value={image || iconUrl} />
-            <input type="hidden" name="product_image" value={image || iconUrl} />
+            {/* Force the gateway to show the brand logo instead of the deal image */}
+            <input type="hidden" name="image" value={iconUrl} />
+            <input type="hidden" name="product_image" value={iconUrl} />
             
             <input type="hidden" name="amount" value={total} />
             <input type="hidden" name="symbol" value="EUR" />
