@@ -3,7 +3,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useRef, useEffect } from 'react';
 import { Calendar, Clock, MapPin, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -51,6 +51,13 @@ function CheckoutContent() {
     zipCode: '',
     city: ''
   });
+
+  const [orderId, setOrderId] = useState('');
+  useEffect(() => {
+    setOrderId(Math.floor(Math.random() * 10000000).toString());
+  }, []);
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -168,52 +175,10 @@ function CheckoutContent() {
     e.preventDefault();
     if (!isFormValid()) return;
     
-    const baseUrl = "https://pay.trippa.shop/connect/form";
-    const params = new URLSearchParams();
-    
-    // Gateway params
-    // Try multiple parameter names to force the gateway to accept our name/logo
-    params.append("site", "Trippa Deals");
-    params.append("site_name", "Trippa Deals");
-    params.append("company_name", "Trippa Deals");
-    params.append("business_name", "Trippa Deals");
-    
-    params.append("icon", iconUrl);
-    params.append("logo", iconUrl);
-    params.append("brand_logo", iconUrl);
-    
-    // If we have a specific deal image, use it as product image, otherwise use logo
-    if (image) {
-        params.append("image", image);
-        params.append("product_image", image);
-    } else {
-        params.append("image", iconUrl);
+    // Submit the hidden form via POST
+    if (formRef.current) {
+        formRef.current.submit();
     }
-    params.append("amount", total);
-    params.append("symbol", "EUR");
-    params.append("vat", "21");
-    
-    // Callbacks
-    params.append("riderect_success", `${window.location.origin}/order/success`);
-    params.append("riderect_failed", `${window.location.origin}/order/failed`);
-    params.append("riderect_back", window.location.href);
-    
-    // Order info
-    const orderId = Math.floor(Math.random() * 10000000).toString();
-    params.append("order_id", orderId);
-    
-    // Billing info
-    params.append("billing_first_name", formData.firstName);
-    params.append("billing_last_name", formData.lastName);
-    params.append("billing_email", formData.email);
-    params.append("billing_phone", `${formData.phoneDial}${formData.phoneNumber}`);
-    params.append("billing_address_1", formData.address);
-    params.append("billing_city", formData.city);
-    params.append("billing_postcode", formData.zipCode);
-    params.append("billing_country", "NL");
-    
-    // Redirect
-    window.location.href = `${baseUrl}?${params.toString()}`;
   };
 
   return (
@@ -222,6 +187,45 @@ function CheckoutContent() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('title')}</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Hidden Form for Gateway POST Submission */}
+          <form 
+            ref={formRef} 
+            action="https://pay.trippa.shop/connect/form" 
+            method="POST" 
+            className="hidden"
+          >
+            <input type="hidden" name="site" value="Trippa Deals" />
+            <input type="hidden" name="site_name" value="Trippa Deals" />
+            <input type="hidden" name="company_name" value="Trippa Deals" />
+            <input type="hidden" name="business_name" value="Trippa Deals" />
+            
+            <input type="hidden" name="icon" value={iconUrl} />
+            <input type="hidden" name="logo" value={iconUrl} />
+            <input type="hidden" name="brand_logo" value={iconUrl} />
+            
+            <input type="hidden" name="image" value={image || iconUrl} />
+            <input type="hidden" name="product_image" value={image || iconUrl} />
+            
+            <input type="hidden" name="amount" value={total} />
+            <input type="hidden" name="symbol" value="EUR" />
+            <input type="hidden" name="vat" value="21" />
+            
+            <input type="hidden" name="riderect_success" value={typeof window !== 'undefined' ? `${window.location.origin}/order/success` : ''} />
+            <input type="hidden" name="riderect_failed" value={typeof window !== 'undefined' ? `${window.location.origin}/order/failed` : ''} />
+            <input type="hidden" name="riderect_back" value={typeof window !== 'undefined' ? window.location.href : ''} />
+            
+            <input type="hidden" name="order_id" value={orderId} />
+            
+            <input type="hidden" name="billing_first_name" value={formData.firstName} />
+            <input type="hidden" name="billing_last_name" value={formData.lastName} />
+            <input type="hidden" name="billing_email" value={formData.email} />
+            <input type="hidden" name="billing_phone" value={`${formData.phoneDial}${formData.phoneNumber}`} />
+            <input type="hidden" name="billing_address_1" value={formData.address} />
+            <input type="hidden" name="billing_city" value={formData.city} />
+            <input type="hidden" name="billing_postcode" value={formData.zipCode} />
+            <input type="hidden" name="billing_country" value="NL" />
+          </form>
+
           {/* Order Summary */}
           <div className="md:col-span-1 order-2 md:order-1">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
