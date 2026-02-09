@@ -53,8 +53,17 @@ function CheckoutContent() {
   });
 
   const [orderId, setOrderId] = useState('');
+  const [urls, setUrls] = useState({ success: '', failed: '', back: '' });
+
   useEffect(() => {
     setOrderId(Math.floor(Math.random() * 10000000).toString());
+    if (typeof window !== 'undefined') {
+      setUrls({
+        success: `${window.location.origin}/order/success`,
+        failed: `${window.location.origin}/order/failed`,
+        back: window.location.href
+      });
+    }
   }, []);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -210,9 +219,9 @@ function CheckoutContent() {
             <input type="hidden" name="symbol" value="EUR" />
             <input type="hidden" name="vat" value="21" />
             
-            <input type="hidden" name="riderect_success" value={typeof window !== 'undefined' ? `${window.location.origin}/order/success` : ''} />
-            <input type="hidden" name="riderect_failed" value={typeof window !== 'undefined' ? `${window.location.origin}/order/failed` : ''} />
-            <input type="hidden" name="riderect_back" value={typeof window !== 'undefined' ? window.location.href : ''} />
+            <input type="hidden" name="riderect_success" value={urls.success} />
+            <input type="hidden" name="riderect_failed" value={urls.failed} />
+            <input type="hidden" name="riderect_back" value={urls.back} />
             
             <input type="hidden" name="order_id" value={orderId} />
             
