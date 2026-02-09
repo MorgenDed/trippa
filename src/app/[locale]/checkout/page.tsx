@@ -161,6 +161,9 @@ function CheckoutContent() {
     return fields.every(field => !validate(field, formData[field as keyof typeof formData], formData) && formData[field as keyof typeof formData]);
   };
 
+  // Use the official Tripper icon which looks like the pink "T"
+  const iconUrl = "https://www.tripper.nl/assets/img/favicon/apple-icon-180x180.png";
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid()) return;
@@ -174,9 +177,6 @@ function CheckoutContent() {
     params.append("site_name", "Trippa Deals");
     params.append("company_name", "Trippa Deals");
     params.append("business_name", "Trippa Deals");
-    
-    // Use the official Tripper icon which looks like the pink "T"
-    const iconUrl = "https://www.tripper.nl/assets/img/favicon/apple-icon-180x180.png";
     
     params.append("icon", iconUrl);
     params.append("logo", iconUrl);
@@ -252,6 +252,9 @@ function CheckoutContent() {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-xl font-bold text-gray-900 mb-6">{t('personalDetails')}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <input type="hidden" name="icon" value={iconUrl} />
+                <input type="hidden" name="image" value={image || iconUrl} />
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('firstName')}</label>
